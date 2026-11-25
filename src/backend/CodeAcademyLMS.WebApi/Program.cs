@@ -105,6 +105,24 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Return validation failures as 400 with per-field errors
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next(context);
+    }
+    catch (FluentValidation.ValidationException ex) when (!context.Response.HasStarted)
+    {
+        var errors = ex.Errors
+            .GroupBy(e => e.PropertyName)
+            .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        await context.Response.WriteAsJsonAsync(new { title = "Validation failed", status = 400, errors });
+    }
+});
+
 app.UseCors("CorsPolicy");
 
 app.UseAuthentication();

@@ -1,6 +1,7 @@
 using System.Reflection;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using CodeAcademyLMS.Application.Common.Behaviours;
 
 namespace CodeAcademyLMS.Application;
 
@@ -12,6 +13,7 @@ public static class DependencyInjection
 
         services.AddMediatR(cfg => {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
         });
 
         return services;
